@@ -1,0 +1,69 @@
+{
+  "navbar": [
+    {
+      "type": "settings",
+      "id": "settings_default"
+    },
+    {
+      "type": "rosbridge",
+      "id": "rosbridge_default"
+    },
+    {
+      "type": "grid",
+      "id": "grid_default"
+    },
+    {
+      "type": "tf",
+      "id": "tf_default"
+    },
+    {
+      "type": "map",
+      "id": "map_autoID_1",
+      "container_id": "icon_container"
+    },
+    {
+      "type": "robotmodel",
+      "id": "robotmodel_autoID_3",
+      "container_id": "icon_container"
+    }
+  ],
+  "view": {
+    "center": {
+      "x": 0,
+      "y": 0
+    },
+    "scale": 50
+  },
+  "settings_default": {
+    "fixed_frame": "odom",
+    "background_color": "#273444"
+  },
+  "grid_default": {
+    "size": 1,
+    "thickness": 1,
+    "colour": "#3e556a"
+  },
+  "tf_default": {
+    "show_names": true,
+    "show_axes": true,
+    "show_lines": true,
+    "scale": 1,
+    "frame_visibility": {
+      "base_link": true,
+      "map": true
+    }
+  },
+  "uid": 4,
+  "map_autoID_1": {
+    "topic": "",
+    "opacity": "0.7",
+    "colour_scheme": 0,
+    "throttle": "1000",
+    "use_timestamp": false
+  },
+  "robotmodel_autoID_3": {
+    "frame": "base_link",
+    "sprite": "temi",
+    "length": "0.5"
+  }
+}

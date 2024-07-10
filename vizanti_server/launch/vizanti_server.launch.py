@@ -1,14 +1,19 @@
 import launch
 import launch_ros.actions
+from ament_index_python.packages import get_package_share_directory
+import os
 
 def generate_launch_description():
+
+    pkg_share_dir = get_package_share_directory('vizanti_server')
+    config_file = os.path.join(pkg_share_dir, "public/configs", "config.json")
 
     #general params
     base_url = launch.substitutions.LaunchConfiguration('base_url', default='') #e.g. /vizanti
     port = launch.substitutions.LaunchConfiguration('port', default=5000)
     port_rosbridge = launch.substitutions.LaunchConfiguration('port_rosbridge', default=5001)
     flask_debug = launch.substitutions.LaunchConfiguration('flask_debug', default=True)
-    default_widget_config = launch.substitutions.LaunchConfiguration('default_widget_config', default='') #e.g. ~/your_custom_config.json
+    default_widget_config = launch.substitutions.LaunchConfiguration('default_widget_config', default=config_file) #e.g. ~/your_custom_config.json
 
     #rosbridge internal params
     unregister_timeout = launch.substitutions.LaunchConfiguration('unregister_timeout', default='9999999.9')
