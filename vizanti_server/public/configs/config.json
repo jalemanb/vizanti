@@ -25,14 +25,19 @@
       "type": "robotmodel",
       "id": "robotmodel_autoID_3",
       "container_id": "icon_container"
+    },
+    {
+      "type": "compressedimage",
+      "id": "compressedimage_autoID_4",
+      "container_id": "icon_container"
     }
   ],
   "view": {
     "center": {
-      "x": 0,
-      "y": 0
+      "x": -1.7656886057883856,
+      "y": -0.7193619684366085
     },
-    "scale": 50
+    "scale": 55.12499999999992
   },
   "settings_default": {
     "fixed_frame": "odom",
@@ -53,9 +58,9 @@
       "map": true
     }
   },
-  "uid": 4,
+  "uid": 5,
   "map_autoID_1": {
-    "topic": "",
+    "topic": "/map",
     "opacity": "0.7",
     "colour_scheme": 0,
     "throttle": "1000",
@@ -65,5 +70,14 @@
     "frame": "base_link",
     "sprite": "temi",
     "length": "0.5"
+  },
+  "compressedimage_autoID_4": {
+    "topic": "/yolo/compressed/dbg_image",
+    "opacity": "0.85",
+    "throttle": "500",
+    "width": "25",
+    "img_offset_x": 13.027027027027028,
+    "img_offset_y": 23.040604343720492,
+    "rotation": "0"
   }
 }
