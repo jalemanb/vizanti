@@ -34,10 +34,10 @@
   ],
   "view": {
     "center": {
-      "x": -1.7656886057883856,
-      "y": -0.7193619684366085
+      "x": 1.2768003006201698,
+      "y": -1.0927938645369966
     },
-    "scale": 55.12499999999992
+    "scale": 120.3309616845541
   },
   "settings_default": {
     "fixed_frame": "odom",
@@ -74,7 +74,7 @@
   "compressedimage_autoID_4": {
     "topic": "/yolo/compressed/dbg_image",
     "opacity": "0.85",
-    "throttle": "500",
+    "throttle": "100",
     "width": "25",
     "img_offset_x": 13.027027027027028,
     "img_offset_y": 23.040604343720492,
