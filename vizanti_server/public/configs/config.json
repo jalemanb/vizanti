@@ -13,10 +13,6 @@
       "id": "grid_default"
     },
     {
-      "type": "tf",
-      "id": "tf_default"
-    },
-    {
       "type": "map",
       "id": "map_autoID_1",
       "container_id": "icon_container"
@@ -30,14 +26,24 @@
       "type": "compressedimage",
       "id": "compressedimage_autoID_4",
       "container_id": "icon_container"
+    },
+    {
+      "type": "posewithcovariancestamped",
+      "id": "posewithcovariancestamped_autoID_5",
+      "container_id": "icon_container"
+    },
+    {
+      "type": "tf",
+      "id": "tf_autoID_6",
+      "container_id": "icon_container"
     }
   ],
   "view": {
     "center": {
-      "x": 1.2768003006201698,
-      "y": -1.0927938645369966
+      "x": 0.6239702040267001,
+      "y": -3.118349301428009
     },
-    "scale": 120.3309616845541
+    "scale": 96.08083742929176
   },
   "settings_default": {
     "fixed_frame": "odom",
@@ -48,17 +54,7 @@
     "thickness": 1,
     "colour": "#3e556a"
   },
-  "tf_default": {
-    "show_names": true,
-    "show_axes": true,
-    "show_lines": true,
-    "scale": 1,
-    "frame_visibility": {
-      "base_link": true,
-      "map": true
-    }
-  },
-  "uid": 5,
+  "uid": 7,
   "map_autoID_1": {
     "topic": "/map",
     "opacity": "0.7",
@@ -72,12 +68,32 @@
     "length": "0.5"
   },
   "compressedimage_autoID_4": {
-    "topic": "/yolo/compressed/dbg_image",
+    "topic": "/human_detection_debug/compressed/human_detected",
     "opacity": "0.85",
     "throttle": "100",
     "width": "25",
-    "img_offset_x": 13.027027027027028,
-    "img_offset_y": 23.040604343720492,
+    "img_offset_x": 13.135135135135133,
+    "img_offset_y": 25.87346553352219,
     "rotation": "0"
+  },
+  "posewithcovariancestamped_autoID_5": {
+    "topic": "/human_pose",
+    "scale": 0.5
+  },
+  "tf_autoID_6": {
+    "show_names": true,
+    "show_axes": true,
+    "show_lines": true,
+    "scale": 1,
+    "frame_visibility": {
+      "base_link": true,
+      "map": true,
+      "camera_link": false,
+      "camera_depth_frame": false,
+      "camera_color_frame": false,
+      "camera_color_optical_frame": false,
+      "target_human": true,
+      "camera_depth_optical_frame": true
+    }
   }
 }
