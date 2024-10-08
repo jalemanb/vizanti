@@ -1,6 +1,7 @@
 let viewModule = await import(`${base_url}/js/modules/view.js`);
 let persistentModule = await import(`${base_url}/js/modules/persistent.js`);
 let StatusModule = await import(`${base_url}/js/modules/status.js`);
+let utilModule = await import(`${base_url}/js/modules/util.js`);
 
 let view = viewModule.view;
 let settings = persistentModule.settings;
@@ -11,12 +12,17 @@ let status = new Status(
 	document.getElementById("{uniqueID}_status")
 );
 
+const icon = document.getElementById("{uniqueID}_icon").getElementsByTagName('object')[0];
 const canvas = document.getElementById('{uniqueID}_canvas');
 const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
 
 let grid_size = 1.0;
 let grid_thickness = 1;
 let grid_colour = "#3e556a";
+
+const colourpicker = document.getElementById("{uniqueID}_colorpicker");
+const linethickness = document.getElementById("{uniqueID}_thickness");
+const gridstep = document.getElementById("{uniqueID}_step");
 
 if(settings.hasOwnProperty("{uniqueID}")){
 	const loaded_data  = settings["{uniqueID}"];
@@ -26,6 +32,19 @@ if(settings.hasOwnProperty("{uniqueID}")){
 }else{
 	saveSettings();
 }
+
+linethickness.value = grid_thickness;
+colourpicker.value = grid_colour;
+gridstep.value = grid_size;
+
+//update the icon colour when it's loaded or when the image source changes
+icon.onload = () => {
+	utilModule.setIconColor(icon, colourpicker.value);
+};
+if (icon.contentDocument) {
+	utilModule.setIconColor(icon, colourpicker.value);
+}
+
 
 function saveSettings(){
 	settings["{uniqueID}"] = {
@@ -111,20 +130,6 @@ window.addEventListener("view_changed", drawGrid);
 window.addEventListener('resize', resizeScreen);
 window.addEventListener('orientationchange', resizeScreen);
 
-const colourpicker = document.getElementById("{uniqueID}_colorpicker");
-const linethickness = document.getElementById("{uniqueID}_thickness");
-const gridstep = document.getElementById("{uniqueID}_step");
-
-linethickness.value = grid_thickness;
-colourpicker.value = grid_colour;
-gridstep.value = grid_size;
-
-colourpicker.addEventListener("input", (event) =>{
-	grid_colour = colourpicker.value;
-	drawGrid();
-	saveSettings();
-});
-
 linethickness.addEventListener("input", (event) =>{
 	if(linethickness.value > 20)
 		grid_thickness = 20;
@@ -149,6 +154,13 @@ gridstep.addEventListener("input", (event) =>{
 	else
 		grid_size = parseFloat(gridstep.value);	
 
+	drawGrid();
+	saveSettings();
+});
+
+colourpicker.addEventListener("input", (event) =>{
+	grid_colour = colourpicker.value;
+	utilModule.setIconColor(icon, grid_colour);
 	drawGrid();
 	saveSettings();
 });

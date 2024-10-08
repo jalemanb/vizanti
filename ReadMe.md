@@ -19,11 +19,27 @@ rosdep install -i --from-path src/vizanti -y
 colcon build
 ```
 
+### Docker
+
+Alternatively, you can also containerize Vizanti. For that you need to [install Docker](https://docs.docker.com/engine/install/ubuntu/) and build the container:
+
+In case you're building on a system with a different version of ROS or it's not installed, replace $ROS_DISTRO with either humble or jazzy.
+
+```bash
+git clone -b ros2 https://github.com/MoffKalast/vizanti.git
+cd vizanti
+docker build -f docker/Dockerfile -t vizanti:2.0 . --build-arg ROS_VERSION=$ROS_DISTRO
+```
 
 ## Run
 ```bash
 ros2 launch vizanti_server vizanti_server.launch.py
-```
+```  
+Or with Docker (set env vars directly if they need to be different):
+```bash
+docker run --rm -it --net=host --name vizanti-ros2 -e ROS_DOMAIN_ID=$ROS_DOMAIN_ID -e RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION -e USE_RWS=false -v /dev/shm:/dev/shm vizanti:2.0
+```  
+
 The web app can be accessed at `http://<host_ip>:5000`. Client settings are automatically saved in localStorage. The satelite imagery renderer also uses the indexedDB to store tiles for offline use (note that this is IP specific). By default the rosbridge instance also occupies port 5001.
 
 If you're using a mobile device connected to a robot's hotspot that doesn't have internet access and can't load the page, turn off mobile data. This will prevent the browser from sending packets to the wrong gateway.
@@ -36,17 +52,17 @@ With rosbridge being a Tornado python based package and rclpy being overly CPU h
 
 ```bash
 cd ~/colcon_ws/src
-git clone -b humble https://github.com/v-kiniv/rws.git
+git clone -b $ROS_DISTRO https://github.com/v-kiniv/rws.git
 
 cd ..
-rosdep install -i --from-path src/vizanti --rosdistro humble -y
+rosdep install -i --from-path src/rws -y 
 colcon build
 ```
 
 If using FastDDS:
 
 ```bash
-sudo apt install ros-humble-rmw-fastrtps-dynamic-cpp
+sudo apt install ros-$ROS_DISTRO-rmw-fastrtps-dynamic-cpp
 export RMW_IMPLEMENTATION=rmw_fastrtps_dynamic_cpp
 ```
 
@@ -54,6 +70,11 @@ Then run the RWS launch instead:
 
 ```bash
 ros2 launch vizanti_server vizanti_rws.launch.py
+```
+
+Or with Docker (set env vars directly if they need to be different):
+```bash
+docker run --rm -it --net=host --name vizanti-ros2 -e ROS_DOMAIN_ID=$ROS_DOMAIN_ID -e RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION -e USE_RWS=true -v /dev/shm:/dev/shm vizanti:2.0
 ```
 
 ----

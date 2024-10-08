@@ -105,11 +105,11 @@
 				</div>
 			</div>
 
-			<div class="widget_entry" onclick="addWidget('waypoints','')" data-topic="nav_msgs/msg/Path">
+			<div class="widget_entry" onclick="addWidget('waypoints','')" data-topic="nav_msgs/msg/Path,geometry_msgs/msg/PoseArray">
 				<img src="assets/waypoints.svg" alt="Waypoints" class="card_icon">
 				<div class="card">
 					<b class="card_title">Waypoint Mission</b>
-					<p class="card_desc">Send a list of goals [nav_msgs/Path]</p>
+					<p class="card_desc">Send a list of goals [nav_msgs/Path] or [geometry_msgs/PoseArray]</p>
 				</div>
 			</div>
 
@@ -126,6 +126,22 @@
 				<div class="card">
 					<b class="card_title">Button</b>
 					<p class="card_desc">Display and toggle [std_msgs/Bool], or send [std_msgs/Empty]</p>
+				</div>
+			</div>
+
+			<div class="widget_entry" onclick="addWidget('altimeter','')" data-topic="std_msgs/msg/Float32">
+				<img src="assets/altimeter.svg" alt="Altimeter" class="card_icon">
+				<div class="card">
+					<b class="card_title">Altimeter</b>
+					<p class="card_desc">Track Z height of a TF link, send a [std_msgs/Float32] target.</p>
+				</div>
+			</div>
+
+			<div class="widget_entry" onclick="addWidget('speedometer','')">
+				<img src="assets/speedometer_icon.svg" alt="Speedometer" class="card_icon">
+				<div class="card">
+					<b class="card_title">Speedometer</b>
+					<p class="card_desc">Track the speed of a TF link.</p>
 				</div>
 			</div>
 
@@ -149,7 +165,7 @@
 			</div>
 
 			<div class="widget_entry" onclick="addWidget('gridcells','')" data-topic="nav_msgs/msg/GridCells">
-				<img src="assets/gridcells.svg" alt="Grid Cells" class="card_icon" style="filter:hue-rotate(123deg) saturate(53.0303%) brightness(310.588%)">
+				<img src="assets/gridcells.svg" alt="Grid Cells" class="card_icon">
 				<div class="card">
 					<b class="card_title">Grid Cells</b>
 					<p class="card_desc">nav_msgs/GridCells</p>
@@ -183,7 +199,7 @@
 			</div>	
 
 			<div class="widget_entry" onclick="addWidget('scan','')" data-topic="sensor_msgs/msg/LaserScan">
-				<img src="assets/scan.svg" alt="Scan" class="card_icon" style="filter:hue-rotate(4deg) saturate(100%) brightness(400%)">
+				<img src="assets/scan.svg" alt="Scan" class="card_icon">
 				<div class="card">
 					<b class="card_title">Laser Scan</b>
 					<p class="card_desc">sensor_msgs/LaserScan</p>
@@ -191,7 +207,7 @@
 			</div>
 
 			<div class="widget_entry" onclick="addWidget('pointcloud','')" data-topic="sensor_msgs/msg/PointCloud2">
-				<img src="assets/pointcloud.svg" alt="Pointcloud" class="card_icon" style="filter:hue-rotate(199deg) saturate(100%) brightness(400%)">
+				<img src="assets/pointcloud.svg" alt="Pointcloud" class="card_icon">
 				<div class="card">
 					<b class="card_title">Point Cloud</b>
 					<p class="card_desc">sensor_msgs/PointCloud2</p>
@@ -199,23 +215,23 @@
 			</div>
 
 			<div class="widget_entry" onclick="addWidget('path','')" data-topic="nav_msgs/msg/Path">
-				<img src="assets/path.svg" alt="Path" class="card_icon" style="filter:hue-rotate(115deg) saturate(61.3953%) brightness(337.255%)">
+				<img src="assets/path.svg" alt="Path" class="card_icon">
 				<div class="card">
 					<b class="card_title">Path</b>
 					<p class="card_desc">nav_msgs/Path</p>
 				</div>
 			</div>
 
-			<div class="widget_entry" onclick="addWidget('posewithcovariancestamped','')" data-topic="geometry_msgs/msg/PoseWithCovarianceStamped">
+			<div class="widget_entry" onclick="addWidget('posewithcovariancestamped','')" data-topic="geometry_msgs/msg/PoseWithCovarianceStamped,geometry_msgs/msg/PoseStamped">
 				<img src="assets/posewithcovariancestamped.svg" alt="PoseCovStamped" class="card_icon">
 				<div class="card">
-					<b class="card_title">Pose with Covariance (Stamped)</b>
-					<p class="card_desc">geometry_msgs/PoseWithCovarianceStamped</p>
+					<b class="card_title">Pose</b>
+					<p class="card_desc">geometry_msgs/PoseWithCovarianceStamped, geometry_msgs/PoseStamped</p>
 				</div>
 			</div>
 
 			<div class="widget_entry" onclick="addWidget('posearray','')" data-topic="geometry_msgs/msg/PoseArray">
-				<img src="assets/posearray.svg" alt="PoseArray" class="card_icon" style="filter:hue-rotate(0deg) saturate(100%) brightness(218.039%)">
+				<img src="assets/posearray.svg" alt="PoseArray" class="card_icon">
 				<div class="card">
 					<b class="card_title">Pose Array</b>
 					<p class="card_desc">geometry_msgs/PoseArray</p>
