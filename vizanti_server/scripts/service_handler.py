@@ -5,7 +5,6 @@ import os
 import fcntl
 import sys
 import rclpy
-import yaml
 import json
 import time
 
@@ -13,6 +12,10 @@ from rclpy.node import Node
 
 from rclpy.executors import  MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
+
+from ros2pkg.api import get_package_names, get_prefix_path
+from rqt_reconfigure_param_api import create_param_client
+from rclpy.parameter import Parameter
 
 from std_srvs.srv import Trigger
 from vizanti_msgs.srv import GetNodeParameters, SetNodeParameter
@@ -22,10 +25,10 @@ from vizanti_msgs.srv import ManageNode, ListPackages, ListExecutables
 
 class ServiceHandler(Node):
     def __init__(self, group):
-        super().__init__("vizanti_topic_handler")
+        super().__init__("vizanti_service_handler")
 
         self.proc = None
-        self.packages = self.get_packages()
+        self.packages = sorted(list(get_package_names()))
 
         self.get_node_parameters_service = self.create_service(GetNodeParameters, 'vizanti/get_node_parameters', self.get_node_parameters, callback_group=group)
         self.set_node_parameter_service = self.create_service(SetNodeParameter, 'vizanti/set_node_parameter', self.set_node_parameter, callback_group=group)
@@ -34,7 +37,6 @@ class ServiceHandler(Node):
         self.save_map_service = self.create_service(SaveMap, 'vizanti/save_map', self.save_map, callback_group=group)
 
         self.record_setup_service = self.create_service(RecordRosbag, 'vizanti/bag/setup', self.recording_setup, callback_group=group)
-
 
         self.kill_service = self.create_service(ManageNode, 'vizanti/node/kill', self.node_kill, callback_group=group)
         self.start_service = self.create_service(ManageNode, 'vizanti/node/start', self.node_start, callback_group=group)
@@ -46,14 +48,6 @@ class ServiceHandler(Node):
         self.list_executables_service = self.create_service(ListExecutables, 'vizanti/list_executables', self.list_executables_callback, callback_group=group)
 
         self.get_logger().info("Service handler ready.")
-    
-    def get_packages(self):
-        # Use aros2pkg to get list of packages
-        process = subprocess.Popen(['ros2', 'pkg', 'list'], stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        # Process output
-        lines = output.decode('utf-8').split('\n')
-        return lines
 
     def list_packages_callback(self, req, res):
         res.packages = self.packages
@@ -74,32 +68,21 @@ class ServiceHandler(Node):
             res.executables = []
             return res
         
-        process = subprocess.Popen(['ros2', 'pkg', 'prefix', req.package], stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        path = output.decode('utf-8').strip()
+        path = get_prefix_path(req.package)
 
-        self.get_logger().info(f"Executables Package: {req.package}")
-        self.get_logger().info(f"Path: {path}")
-
-        libpath = path+"/share/"+req.package
-        launchpath = path+"/lib/"+req.package
         #TODO add path to apt installed packages, I'm not sure where exactly those executables are yet
-        self.get_logger().info(f"libpath: {libpath}")
+        #self.get_logger().info(f"libpath: {libpath}")
 
-        cmd_exec = ["find", libpath] # get list of executables
+        cmd_exec = ["find", path+"/share/"+req.package] # get list of executables
         cmd_exec = cmd_exec + ["-type", "f", "-o", "-type", "l"] # files or symlinks
 
-        cmd_launch = ["find", launchpath]
+        cmd_launch = ["find", path+"/lib/"+req.package]
         cmd_launch = cmd_launch + ["-type", "f", "-o", "-type", "l"]
-        
-        self.get_logger().info(f"cmd_exec: {cmd_exec}")
-        self.get_logger().info(f"cmd_python_and_launch: {cmd_launch}")
-
         process_exec = subprocess.Popen(cmd_exec, stdout=subprocess.PIPE)
         process_launch = subprocess.Popen(cmd_launch, stdout=subprocess.PIPE)
 
-        output_exec, error_exec = process_exec.communicate()
-        output_launch, error_launch = process_launch.communicate()
+        output_exec, _ = process_exec.communicate()
+        output_launch, _ = process_launch.communicate()
 
         # Process output
         lines_exec = self.get_filenames(output_exec.decode('utf-8').split('\n'))
@@ -238,30 +221,59 @@ class ServiceHandler(Node):
 
     def get_node_parameters(self, req, res):
         try:
-            proc = subprocess.Popen("ros2 param dump "+req.node, stdout=subprocess.PIPE, stderr=subprocess. STDOUT, shell=True)
-            node_params = proc.communicate(timeout=5)[0].decode('utf-8')
+            param_client = create_param_client(self, req.node)
+            param_names = param_client.list_parameters()
+            descriptors = param_client.describe_parameters(param_names)
+            #Parameter.Type Enum
+            #  <Type.NOT_SET: 0>,
+            #  <Type.BOOL: 1>,
+            #  <Type.INTEGER: 2>,
+            #  <Type.DOUBLE: 3>,
+            #  <Type.STRING: 4>,
+            #  <Type.BYTE_ARRAY: 5>,
+            #  <Type.BOOL_ARRAY: 6>,
+            #  <Type.INTEGER_ARRAY: 7>,
+            #  <Type.DOUBLE_ARRAY: 8>,
+            #  <Type.STRING_ARRAY: 9>
 
-            if node_params.startswith("failed"):
-                raise Exception
-
-            parsed = yaml.safe_load(node_params)
-            res.parameters = json.dumps(parsed[list(parsed.keys())[0]])
-        except:
-            res.parameters = "{}"
+            parameters = param_client.get_parameters(param_names)
+            param_list = []
+            for param, descriptor in zip(parameters, descriptors):
+                if descriptor.type > 0 and descriptor.type < 5: #TODO add support for the rest if anyone actually uses them
+                    param_list.append([param.name, param.value, descriptor.type])
+            res.parameters = json.dumps(param_list)            
+        except Exception as e:
+            res.parameters = "[]"
+            print(f"Failed to fetch parameters from node: {e}")
         return res
     
     def set_node_parameter(self, req, res):
         try:
-            proc = subprocess.Popen("ros2 param set "+req.node+" "+req.param+" "+req.value, stdout=subprocess.PIPE, stderr=subprocess. STDOUT, shell=True)
-            node_params = proc.communicate(timeout=5)[0].decode('utf-8')
+            param_client = create_param_client(self, req.node)
+            descriptors = param_client.describe_parameters([req.param])
+            param_type = Parameter.Type(descriptors[0].type)
 
-            if node_params.startswith("failed"):
-                raise Exception
+            value = req.value
+            if param_type == Parameter.Type.BOOL:
+                value = bool(value)
+            elif param_type == Parameter.Type.INTEGER:
+                value = int(value)
+            elif param_type == Parameter.Type.DOUBLE:
+                value = float(value)
+            """elif param_type == Parameter.Type.BYTE_ARRAY:
+                value = int(value)
+            elif param_type == Parameter.Type.BOOL_ARRAY:
+                value = int(value)
+            elif param_type == Parameter.Type.DOUBLE_ARRAY:
+                value = int(value)
+            elif param_type == Parameter.Type.STRING_ARRAY:
+                value = int(value)"""
 
+            parameter = Parameter(name=req.param, type_=param_type, value=value)
+            param_client.set_parameters([parameter])
             res.status = "Ok."
-        except:
+        except Exception as e:
             res.status = "Error, could not set param."
-
         return res
 
     def recording_status(self, req, res):
