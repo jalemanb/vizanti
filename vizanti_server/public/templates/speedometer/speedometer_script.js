@@ -95,7 +95,7 @@ function writeText(speed_ms, minspeed_ms, maxspeed_ms){
 		if (num >= 100) return num.toFixed(2);
 		if (num >= 10) return num.toFixed(2);
 		return num.toFixed(3);
-	  }
+	}
 
 	text_spd.innerText = "Speed: " + (speed_ms * mult).toFixed(2) + " " + units;
     text_spd_min.innerText = "Min Speed: " + (minspeed_ms * mult).toFixed(2) + " " + units;
@@ -134,8 +134,11 @@ function calculateSpeed() {
     const deltaTimeSec = tf.getTimeStampDelta(prev_stamp, time_now);
 
     // Skip duplicated calls
-    if (deltaTimeSec < 0.01)
+    if (deltaTimeSec < 0.01){
+		prev = transformed;
+    	prev_stamp = time_now;
 		return;
+	}
 
 	const dist = Math.hypot(
         prev.translation.x - transformed.translation.x,

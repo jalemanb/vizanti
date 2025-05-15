@@ -48,6 +48,12 @@ colourpicker.addEventListener("input", (event) =>{
 	drawMarkers();
 });
 
+const decay = document.getElementById('{uniqueID}_decay');
+decay.addEventListener("input", (event) =>{
+	saveSettings();
+	connect();
+});
+
 const canvas = document.getElementById('{uniqueID}_canvas');
 const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
 
@@ -62,6 +68,8 @@ if(settings.hasOwnProperty("{uniqueID}")){
 	scaleSliderValue.textContent = scaleSlider.value;
 
 	typedict = loaded_data.typedict ?? {};
+
+	decay.value = loaded_data.decay ?? 10000;
 
 }else{
 	saveSettings();
@@ -81,7 +89,8 @@ function saveSettings(){
 		topic: topic,
 		scale: parseFloat(scaleSlider.value),
 		typedict: typedict,
-		color: colourpicker.value
+		color: colourpicker.value,
+		decay: decay.value
 	}
 	settings.save();
 }
@@ -123,30 +132,19 @@ async function drawMarkers(){
         ctx.fill();
 	}
 	
-	function drawTranslationalCovariance(covariance, size) {
-		
-		if(covariance === undefined)
+	function drawTranslationalCovariance(eigenvalues, size) {
+		if (eigenvalues === undefined)
 			return;
+	
+		const radiusX = Math.sqrt(eigenvalues.lambda1) * size;
+		const radiusY = Math.sqrt(eigenvalues.lambda2) * size;
+		const theta = Math.atan2(eigenvalues.eigenvector1[1], eigenvalues.eigenvector1[0]);
 
-		const varianceX = Math.sqrt(covariance[0]);
-		const varianceY = Math.sqrt(covariance[7]);
-	  
-		// Compute the standard deviation, which will be the radius for our ellipse.
-		const radiusX = Math.sqrt(varianceX) * size;
-		const radiusY = Math.sqrt(varianceY) * size;
-	  
-		// Compute the angle of rotation.
-		const theta = Math.atan2(covariance[1], covariance[0] - covariance[7]);
-
-		// Draw the ellipse.
-		ctx.fillStyle = 'rgba(204, 51, 204, 0.2)'; // Purple, semi-transparent
-
-		ctx.save();
+		ctx.fillStyle = 'rgba(204, 51, 204, 0.4)';
 		ctx.rotate(theta);
 		ctx.beginPath();
 		ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, 2 * Math.PI);
 		ctx.fill();
-		ctx.restore();
 	}
 
 	function drawAngularCovariance(covariance, size) {
@@ -171,9 +169,13 @@ async function drawMarkers(){
 	const wid = canvas.width;
     const hei = canvas.height;
 
+	ctx.setTransform(1,0,0,1,0,0);
 	ctx.clearRect(0, 0, wid, hei);
 
 	if(!posemsg)
+		return;
+
+	if(decay.value > 0 && new Date() - posemsg.stamp > decay.value)
 		return;
 
 	if(frame === tf.fixed_frame){
@@ -181,24 +183,59 @@ async function drawMarkers(){
 		const screenpos = view.fixedToScreen(posemsg);
 		const scale = unit*parseFloat(scaleSlider.value);
 
-		ctx.save();
-		ctx.translate(screenpos.x, screenpos.y);
-		ctx.scale(1, -1);
+		ctx.setTransform(1,0,0,-1,screenpos.x, screenpos.y); //sx,0,0,sy,px,py
+		
+		drawTranslationalCovariance(posemsg.eigenvalues, unit);
+		ctx.setTransform(1,0,0,-1,screenpos.x, screenpos.y);
 
 		if(!posemsg.rotation_invalid)
 			ctx.rotate(posemsg.yaw);
 
-		drawTranslationalCovariance(posemsg.covariance, unit);
-
 		if(!posemsg.rotation_invalid){
-			drawAngularCovariance(posemsg.covariance, unit);
+			drawAngularCovariance(posemsg.covariance, scale);
 			drawArrow(scale);
 		}else{
 			drawCircle(scale*0.4);
 		}
+	}
+}
 
-		ctx.restore();
+function calculateEigen(covariance){
+	//2x2 covariance submatrix for x and y.
+	const covMatrix = [
+		[covariance[0], covariance[1]],
+		[covariance[6], covariance[7]]
+	];
 
+	const a = covMatrix[0][0];
+	const b = covMatrix[0][1];
+	const c = covMatrix[1][1];
+	const trace = a + c;
+	const det = a * c - b * b;
+	const lambda1 = trace / 2 + Math.sqrt(trace * trace / 4 - det);
+	const lambda2 = trace / 2 - Math.sqrt(trace * trace / 4 - det);
+
+	let eigenvector1, eigenvector2;
+
+	if (b !== 0) {
+		eigenvector1 = [lambda1 - c, b];
+		eigenvector2 = [lambda2 - c, b];
+	} else {
+		eigenvector1 = [1, 0];  // If off-diagonal is 0, the eigenvectors are aligned with the axes.
+		eigenvector2 = [0, 1];
+	}
+
+	const norm1 = Math.sqrt(eigenvector1[0] * eigenvector1[0] + eigenvector1[1] * eigenvector1[1]);
+	const norm2 = Math.sqrt(eigenvector2[0] * eigenvector2[0] + eigenvector2[1] * eigenvector2[1]);
+
+	eigenvector1 = [eigenvector1[0] / norm1, eigenvector1[1] / norm1];
+	eigenvector2 = [eigenvector2[0] / norm2, eigenvector2[1] / norm2];
+
+	return {
+		eigenvector1: eigenvector1,
+		eigenvector2: eigenvector2,
+		lambda1: lambda1,
+		lambda2: lambda2
 	}
 }
 
@@ -264,7 +301,9 @@ function connect(){
 			y: transformed.translation.y,
 			yaw: transformed.rotation.toEuler().h,
 			rotation_invalid: rotation_invalid,
-			covariance: skip_covariance ? undefined : msg.pose.covariance
+			covariance: skip_covariance ? undefined : msg.pose.covariance,
+			eigenvalues: skip_covariance ? undefined : calculateEigen(msg.pose.covariance),
+			stamp: new Date()
 		};
 	
 		drawMarkers();

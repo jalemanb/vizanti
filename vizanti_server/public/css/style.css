@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'Ubuntu Mono';
+    src: url('./font/ubuntu.mono.woff2') format('woff2'),
+         url('./font/ubuntu.mono.woff') format('woff'),
+         url('./font/ubuntu.mono.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 html, body {
 	min-height: 100%;
 	margin: 0;
@@ -6,7 +15,7 @@ html, body {
 	color: white;
 	background-color: #273444;
 
-	font-family: Monospace;
+	font-family: 'Ubuntu Mono', Monospace;
 
 	font-size: 1.0rem;
 	text-rendering: optimizeLegibility;
@@ -26,8 +35,27 @@ h1, h2, h3, b, p {
 	scrollbar-width: thin;
 }
 
+.comment {
+	font-size: 15px;
+	margin-top: 0.5em;
+	margin-bottom: 1.5em;
+	color:#b4b4b4;
+}
+
+.dark_hr{
+	border: 1px solid rgba(128, 128, 128, 0.5);
+}
+
+a {
+	color:rgb(0, 186, 243)
+}
+
 h3 {
 	margin-bottom: 5px;
+}
+
+h4 {
+	margin-top: 1.5em;
 }
 
 /* Icon bar */
@@ -288,6 +316,7 @@ object {
 	align-content: start;
 }
 
+
 /* Media query for non-touch devices (usually desktop) */
 @media (pointer: fine) {
 	.modal_inner {
@@ -374,6 +403,25 @@ object {
 	height: 3px;
 }
 
+.live_data_display {
+    background: #12181f;
+    color: #ffffff; 
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 15px;
+    line-height: 1.6; 
+	border-left: 3px solid gray;
+	margin-bottom: 1rem;
+}
+
+.live_data_display p {
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 /* Input box */
 
 input[type=color] {
@@ -382,9 +430,10 @@ input[type=color] {
 	font-size: 1.0rem;
 	border-radius: 4px;
 	outline: 0;
+	height: 24px;
 	color: white;
 	background-color: #424242;
-	font-family: Monospace;
+	font-family: 'Ubuntu Mono', Monospace;
 }
 
 input[type=number] {
@@ -392,19 +441,21 @@ input[type=number] {
 	min-width: 100px;
 	font-size: 1.0rem;
 	border-radius: 4px;
+	height: 22px;
 	outline: 0;
 	color: white;
 	background-color: #424242;
-	font-family: Monospace;
+	font-family: 'Ubuntu Mono', Monospace;
 }
 
 input[type=text] {
 	width: 80%;
 	font-size: 1.0rem;
+	height: 22px;
 	outline: 0;
 	color: white;
 	background-color: #424242;
-	font-family: Monospace;
+	font-family: 'Ubuntu Mono', Monospace;
 }
 
 br {
@@ -516,9 +567,10 @@ select, .datalist_input {
 	font-size: 1.0rem;
 	border-radius: 4px;
 	outline: 0;
+	height: 24px;
 	color: white;
 	background-color: #424242;
-	font-family: Monospace;
+	font-family: 'Ubuntu Mono', Monospace;
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
@@ -589,14 +641,17 @@ button {
 	max-width: 100%;
 	font-size: 1.0rem;
 
-	border-radius: 6px;
 	border: 3px solid #757575; 
 	border-radius: 2px;
-	font-family: Monospace;
+	font-family: 'Ubuntu Mono', Monospace;
 
 	color: white;
 	background-color: #484848;
 	margin-bottom: 5px;
+}
+
+.export_button {
+	margin-right: 10px;
 }
 
 .tablinks{
@@ -613,6 +668,64 @@ button:hover{
 	transform: scale(1.02);
 	text-decoration: none;
 	cursor: pointer;
+}
+
+@keyframes buttonPressFlash {
+	0% {
+		border-color: #3a9cff;
+		transform: scale(1.15);
+		font-size: 1.17em;
+		color: #4d9aff;
+	}
+	100% {
+		border-color: transparent;
+		transform: scale(1);
+		font-size: 1em;
+		color: white;
+	}
+}
+
+.button-press-effect {
+	animation: buttonPressFlash 0.25s ease-out;
+}
+
+
+/* Dropdown */
+
+.dropdown-menu {
+	position: fixed;
+	background: rgba(0, 0, 0, 0.7);
+	border-radius: 15px;
+	width: 90px;
+	z-index: 25;
+}
+
+.dropdown-inner {
+	background: rgba(100, 100, 100, 0.5);
+	border-radius: 15px;
+}
+
+.dropdown-item {
+	border-radius: 15px;
+	display: flex;
+	align-items: center;
+	padding: 8px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	cursor: pointer;
+	font-size: 14px;
+	color: rgb(255, 255, 255);
+	transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+	background: #706300;
+}
+
+.dropdown-icon {
+	width: 16px;
+	height: 16px;
+	margin-right: 8px;
 }
 
 /* Misc */
@@ -647,6 +760,9 @@ button:hover{
 	-webkit-tap-highlight-color:rgba(0,0,0,0);
 }
 
+li {
+	padding-bottom: 7px;
+}
 
 /* Loader */
 
@@ -689,10 +805,8 @@ button:hover{
 	overflow-x: auto;
 	scrollbar-color: #4242426a #99999978;
 	scrollbar-width: thin;
-
-	max-width: 50vw;
-	width: 50vw;
-	min-width: 50vw;
+	white-space: nowrap;
+	width: 100%;
 }
 
 .collapsible:hover{
@@ -701,6 +815,7 @@ button:hover{
 
 .collapsible:after {
 	content: '-';
+	white-space: nowrap;
 	color: #ffffff;
 	font-weight: bold;
 	float: right;
@@ -719,13 +834,20 @@ button:hover{
 	overflow-x: auto;
 	scrollbar-color: #4242426a #99999978;
 	scrollbar-width: thin;
+	padding-top: 15px;
+    margin-top: -5px;
 }
 
 /* Node manager*/
 
 .node-box {
 	background-color: #282828;
-	border-radius: 15px;
+	border-left: 6px solid gray;
+	border-top-right-radius: 15px;
+	border-bottom-right-radius: 15px;
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
+	white-space: nowrap;
 	margin-bottom: 10px;
 	padding-left: 15px;
 	height: 40px;
