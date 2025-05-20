@@ -40,14 +40,29 @@
       "type": "compressedimage",
       "id": "compressedimage_autoID_4",
       "container_id": "icon_container"
+    },
+    {
+      "type": "robotmodel",
+      "id": "robotmodel_autoID_13",
+      "container_id": "icon_container"
+    },
+    {
+      "type": "scan",
+      "id": "scan_autoID_15",
+      "container_id": "icon_container"
+    },
+    {
+      "type": "initialpose",
+      "id": "initialpose_autoID_18",
+      "container_id": "icon_container"
     }
   ],
   "view": {
     "center": {
-      "x": 2.5743707306374395,
-      "y": -2.9597886146496917
+      "x": 2.1365210926636795,
+      "y": -1.3430753214737696
     },
-    "scale": 55.12499999999998
+    "scale": 71.69700021147821
   },
   "grid_default": {
     "size": 1,
@@ -55,29 +70,70 @@
     "colour": "#3e556a"
   },
   "settings_default": {
-    "fixed_frame": "odom",
+    "fixed_frame": "map",
     "background_color": "#273444"
   },
   "tf_default": {
-    "show_names": true,
+    "show_names": false,
     "show_axes": true,
     "show_lines": true,
     "scale": 1,
     "frame_visibility": {
-      "base_link": true,
+      "base_link": false,
       "map": true,
-      "camera_depth_frame": true,
-      "camera_link": true,
-      "camera_depth_optical_frame": true,
-      "camera_color_frame": true,
-      "camera_color_optical_frame": true
+      "camera_depth_frame": false,
+      "camera_link": false,
+      "camera_depth_optical_frame": false,
+      "camera_color_frame": false,
+      "camera_color_optical_frame": false,
+      "temi/base_link": true,
+      "ranger/base_footprint": true,
+      "ranger/odom": true,
+      "ranger/bl_Link": false,
+      "ranger/base_link": true,
+      "ranger/br_Link": false,
+      "ranger/camera_front_color_frame": false,
+      "ranger/camera_front_link": false,
+      "ranger/camera_front_color_optical_frame": false,
+      "ranger/camera_front_depth_frame": false,
+      "ranger/camera_front_depth_optical_frame": false,
+      "ranger/camera_rear_color_frame": false,
+      "ranger/camera_rear_link": false,
+      "ranger/camera_rear_color_optical_frame": false,
+      "ranger/camera_rear_depth_frame": false,
+      "ranger/camera_rear_depth_optical_frame": false,
+      "ranger/fl_Link": false,
+      "ranger/fr_Link": false,
+      "temi/camera_depth_frame": false,
+      "temi/camera_link": false,
+      "temi/camera_depth_optical_frame": false,
+      "temi/camera_color_frame": false,
+      "temi/camera_color_optical_frame": false,
+      "ranger/imu_link": false,
+      "ranger/bottom_box_link": false,
+      "ranger/top_robot_link": false,
+      "ranger/camera_front_bottom_screw_frame": false,
+      "ranger/front_camera_support_link": false,
+      "ranger/camera_rear_bottom_screw_frame": false,
+      "ranger/rear_camera_support_link": false,
+      "ranger/screw_lidar_camera_front_link": false,
+      "ranger/front_rslidar": false,
+      "ranger/front_helios": false,
+      "ranger/front_lidar_support_link": false,
+      "ranger/gps_antenna_link": false,
+      "ranger/top_box_link": false,
+      "ranger/screw_lidar_camera_rear_link": false,
+      "ranger/rear_rslidar": false,
+      "ranger/rear_helios": false,
+      "ranger/rear_lidar_support_link": false,
+      "ranger/top_box_lidar_support_link": false
     }
   },
-  "uid": 5,
+  "uid": 21,
   "robotmodel_autoID_0": {
-    "frame": "base_link",
+    "frame": "temi/base_link",
     "sprite": "temi",
-    "length": "0.5"
+    "length": "0.35"
   },
   "map_autoID_1": {
     "topic": "/map",
@@ -87,7 +143,7 @@
     "use_timestamp": false
   },
   "markerarray_autoID_2": {
-    "topic": "/locations"
+    "topic": "/temi/locations"
   },
   "simplegoal_autoID_3": {
     "topic": "/goal_pose"
@@ -100,5 +156,20 @@
     "img_offset_x": "-999",
     "img_offset_y": "-999",
     "rotation": "0"
+  },
+  "robotmodel_autoID_13": {
+    "frame": "ranger/base_link",
+    "sprite": "ranger",
+    "length": "0.5"
+  },
+  "scan_autoID_15": {
+    "topic": "/ranger/scan",
+    "opacity": "1.0",
+    "thickness": "0.02",
+    "color": "#ff0000",
+    "throttle": "50"
+  },
+  "initialpose_autoID_18": {
+    "topic": "/initialpose"
   }
 }
