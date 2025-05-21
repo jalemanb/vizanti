@@ -38,8 +38,7 @@ const buttonContainer = document.getElementById("{uniqueID}_button");
 const buttonImg = buttonContainer.getElementsByTagName("img")[0];
 // const buttonText = buttonContainer.getElementsByTagName("p")[0];
 const buttonpreview = document.getElementById('{uniqueID}_buttonpreview');
-buttonpreview.style.left = `calc(${button_offset_x} - 50px)`;
-buttonpreview.style.top = `calc(${button_offset_y} - 50px)`;
+
 
 sizeSlider.addEventListener('input', () =>  {
 	sizeValue.textContent = sizeSlider.value;
@@ -64,6 +63,9 @@ if(settings.hasOwnProperty("{uniqueID}")){
 	sizeSlider.value = loaded_data.size;
 	sizeValue.textContent = loaded_data.size;
 	typedict = loaded_data.typedict ?? {};
+	button_offset_x = loaded_data.offset_x;
+	button_offset_y = loaded_data.offset_y;
+
 }else{
 	saveSettings();
 }
@@ -73,6 +75,8 @@ function saveSettings(){
 		topic: topic,
 		text: namebox.value,
 		size: sizeSlider.value,
+		offset_x: button_offset_x,
+		offset_y: button_offset_y,
 		typedict: typedict
 	}
 	settings.save();
@@ -284,6 +288,8 @@ function displayButtonImageOffset(x, y) {
 	buttonContainer.style.left = `calc(${offset_x})`;
 	buttonContainer.style.top = `calc(${offset_y})`;
 	buttonContainer.style.transform = "translate(-50%, -50%)";
+	buttonpreview.style.left = `calc(${button_offset_x} - 50px)`;
+	buttonpreview.style.top = `calc(${button_offset_y} - 50px)`;
 }
 
 
