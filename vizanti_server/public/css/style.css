@@ -673,13 +673,13 @@ button:hover{
 @keyframes buttonPressFlash {
 	0% {
 		border-color: #3a9cff;
-		transform: scale(1.15);
+		transform: translate(-50%, -50%) scale(1.15);
 		font-size: 1.17em;
 		color: #4d9aff;
 	}
 	100% {
 		border-color: transparent;
-		transform: scale(1);
+		transform: translate(-50%, -50%) scale(1);
 		font-size: 1em;
 		color: white;
 	}

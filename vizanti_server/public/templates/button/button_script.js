@@ -14,6 +14,9 @@ let status = new Status(
 	document.getElementById("{uniqueID}_status")
 );
 
+let button_offset_x = "50%";
+let button_offset_y = "85%";
+
 let typedict = {};
 
 //persistent loading, so we don't re-fetch on every update
@@ -28,8 +31,25 @@ const icon = icondiv.getElementsByTagName('img')[0];
 const icontext = icondiv.getElementsByTagName('p')[0];
 const namebox = document.getElementById("{uniqueID}_name");
 
+const sizeSlider = document.getElementById('{uniqueID}_size');
+const sizeValue = document.getElementById('{uniqueID}_size_value');
+
+const buttonContainer = document.getElementById("{uniqueID}_button");
+const buttonImg = buttonContainer.getElementsByTagName("img")[0];
+// const buttonText = buttonContainer.getElementsByTagName("p")[0];
+const buttonpreview = document.getElementById('{uniqueID}_buttonpreview');
+buttonpreview.style.left = `calc(${button_offset_x} - 50px)`;
+buttonpreview.style.top = `calc(${button_offset_y} - 50px)`;
+
+sizeSlider.addEventListener('input', () =>  {
+	sizeValue.textContent = sizeSlider.value;
+	saveSettings();
+});
+
+
 namebox.addEventListener('input', function() {
 	icontext.textContent = namebox.value;
+	// buttonText.textContent = namebox.value;
 	saveSettings();
 });
 
@@ -40,6 +60,9 @@ if(settings.hasOwnProperty("{uniqueID}")){
 	topic = loaded_data.topic;
 	namebox.value = loaded_data.text;
 	icontext.textContent = loaded_data.text;
+	// buttonText.textContent = loaded_data.text;
+	sizeSlider.value = loaded_data.size;
+	sizeValue.textContent = loaded_data.size;
 	typedict = loaded_data.typedict ?? {};
 }else{
 	saveSettings();
@@ -49,19 +72,22 @@ function saveSettings(){
 	settings["{uniqueID}"] = {
 		topic: topic,
 		text: namebox.value,
+		size: sizeSlider.value,
 		typedict: typedict
 	}
 	settings.save();
+
+	displayButtonImageOffset(button_offset_x, button_offset_y);
 }
 
 //Messaging
 
 function sendMessage(){
 
-	icondiv.classList.add("button-press-effect");
+	buttonContainer.classList.add("button-press-effect");
 
 	setTimeout(() => {
-		icondiv.classList.remove("button-press-effect");
+		buttonContainer.classList.remove("button-press-effect");
 	}, 200);
 
 	if(typedict[topic] == "std_msgs/msg/Bool" || typedict[topic] == "std_msgs/msg/Empty"){
@@ -225,7 +251,6 @@ async function loadTopics(){
 	}
 }
 
-
 selectionbox.addEventListener("change", (event) => {
 	topic = selectionbox.value;
 	icon.src = icons["default"];
@@ -238,42 +263,86 @@ icon.addEventListener("click", loadTopics);
 loadTopics();
 connect();
 
-// Long press modal open stuff
-let longPressTimer;
-let isLongPress = false;
 
-icondiv.addEventListener("click", (event) =>{
-	if(!isLongPress){
+function displayButtonImageOffset(x, y) {
+	if (!buttonImg.complete) return; // Wait until image is fully loaded
+
+	const size = parseFloat(sizeSlider.value); // percent of screen width
+
+	buttonContainer.style.width = `${size}vw`;
+	buttonContainer.style.height = `${size}vw`;
+	buttonImg.style.width = `${size}vw`;
+	buttonImg.style.height = `${size}vw`;
+
+	let offset_x = x;
+	let offset_y = y;
+
+	// let offset_x = clamp(parseFloat(x), size/2, 100 - size/2);
+	// let offset_y = clamp(parseFloat(y), size/2, 100 - size/2);
+
+	buttonContainer.style.position = "absolute";
+	buttonContainer.style.left = `calc(${offset_x})`;
+	buttonContainer.style.top = `calc(${offset_y})`;
+	buttonContainer.style.transform = "translate(-50%, -50%)";
+}
+
+
+buttonContainer.addEventListener("click", (event) =>{
 		sendMessage();
-	}else{
-		isLongPress = false;
+
+});
+
+
+//preview for moving around
+
+let preview_active = false;
+
+function onStart(event) {
+	preview_active = true;
+	document.addEventListener('mousemove', onMove);
+	document.addEventListener('mouseup', onEnd);
+	document.addEventListener('touchmove', onMove);
+	document.addEventListener('touchend', onEnd);
+}
+
+function onMove(event) {
+	if (preview_active) {
+		event.preventDefault();
+		let currentX, currentY;
+
+		if (event.type === "touchmove") {
+			currentX = event.touches[0].clientX;
+			currentY = event.touches[0].clientY;
+		} else {
+			currentX = event.clientX;
+			currentY = event.clientY;
+		}
+
+		button_offset_x = (currentX/window.innerWidth * 100) +"%";
+		button_offset_y = (currentY/window.innerHeight * 100) +"%";
+		saveSettings();
+
+		buttonpreview.style.left = `calc(${button_offset_x} - 50px)`;
+		buttonpreview.style.top = `calc(${button_offset_y} - 50px)`;
+
+		joystick.destroy();
+		joystick = makeJoystick();
+	
+		addJoystickListeners(joystick);
 	}
-});
-
-icondiv.addEventListener("mousedown", startLongPress);
-icondiv.addEventListener("touchstart", startLongPress);
-
-icondiv.addEventListener("mouseup", cancelLongPress);
-icondiv.addEventListener("mouseleave", cancelLongPress);
-icondiv.addEventListener("touchend", cancelLongPress);
-icondiv.addEventListener("touchcancel", cancelLongPress);
-
-icondiv.addEventListener("contextmenu", (event) => {
-	event.preventDefault();
-});
-
-function startLongPress(event) {
-	isLongPress = false;
-	longPressTimer = setTimeout(() => {
-		isLongPress = true;
-		loadTopics();
-		connect();
-		openModal("{uniqueID}_modal");
-	}, 500);
 }
 
-function cancelLongPress(event) {
-	clearTimeout(longPressTimer);
+function onEnd() {
+	preview_active = false;
+	document.removeEventListener('mousemove', onMove);
+	document.removeEventListener('mouseup', onEnd);
+	document.removeEventListener('touchmove', onMove);
+	document.removeEventListener('touchend', onEnd);
 }
+  
+buttonpreview.addEventListener('mousedown', onStart);
+buttonpreview.addEventListener('touchstart', onStart);
+
+displayButtonImageOffset(button_offset_x, button_offset_y);
 
 console.log("Button Widget Loaded {uniqueID}")
