@@ -81,6 +81,9 @@ def list_template_files():
 def list_robot_model_files():
 	return get_paths("assets/robot_model", ['.png'])
 
+def list_button_imgs_files():
+	return get_paths("assets/btn", ['.svg'])
+
 def get_default_widget_config():
 	return get_file(param_default_widget_config)
 
@@ -165,6 +168,7 @@ def main(args=None):
 	app.add_url_rule(param_base_url + '/', 'index', index)
 	app.add_url_rule(param_base_url + '/templates/files', 'list_template_files', list_template_files)
 	app.add_url_rule(param_base_url + '/assets/robot_model/paths', 'list_robot_model_files', list_robot_model_files)
+	app.add_url_rule(param_base_url + '/assets/btn/paths', 'list_button_imgs_files', list_button_imgs_files)
 	app.add_url_rule(param_base_url + '/ros_launch_params', 'ros_launch_params', list_ros_launch_params)
 	app.add_url_rule(param_base_url + '/default_widget_config', 'get_default_widget_config', get_default_widget_config)
 	app.add_url_rule(param_base_url + '/<path:path>', 'serve_static', serve_static)

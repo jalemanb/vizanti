@@ -2,11 +2,22 @@ let rosbridgeModule = await import(`${base_url}/js/modules/rosbridge.js`);
 let persistentModule = await import(`${base_url}/js/modules/persistent.js`);
 let utilModule = await import(`${base_url}/js/modules/util.js`);
 let StatusModule = await import(`${base_url}/js/modules/status.js`);
+let pathsModule = await import(`${base_url}/assets/btn/paths`);
+
 
 let rosbridge = rosbridgeModule.rosbridge;
 let settings = persistentModule.settings;
 let imageToDataURL = utilModule.imageToDataURL;
 let Status = StatusModule.Status;
+let paths = pathsModule.default;
+
+let models = {};
+paths.map(file => {
+	const name = file.split('.svg')[0].split("_")[1];
+	models[name] = new Image();
+	models[name].src = `${base_url}/assets/btn/${file}`;
+});
+
 
 let topic = getTopic("{uniqueID}");
 let status = new Status(
@@ -16,6 +27,10 @@ let status = new Status(
 
 let button_offset_x = "50%";
 let button_offset_y = "85%";
+let sprite = "none";
+
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+const vwToVh = vw => (vw * window.innerWidth) / window.innerHeight;
 
 let typedict = {};
 
@@ -33,12 +48,16 @@ const namebox = document.getElementById("{uniqueID}_name");
 
 const sizeSlider = document.getElementById('{uniqueID}_size');
 const sizeValue = document.getElementById('{uniqueID}_size_value');
+const spriteSelector = document.getElementById('{uniqueID}_sprite');
+const previewImg = document.getElementById("{uniqueID}_previewimg");
+
 
 const buttonContainer = document.getElementById("{uniqueID}_button");
 const buttonImg = buttonContainer.getElementsByTagName("img")[0];
+const buttonIcon = buttonContainer.getElementsByTagName("img")[1];
+
 // const buttonText = buttonContainer.getElementsByTagName("p")[0];
 const buttonpreview = document.getElementById('{uniqueID}_buttonpreview');
-
 
 sizeSlider.addEventListener('input', () =>  {
 	sizeValue.textContent = sizeSlider.value;
@@ -49,6 +68,14 @@ sizeSlider.addEventListener('input', () =>  {
 namebox.addEventListener('input', function() {
 	icontext.textContent = namebox.value;
 	// buttonText.textContent = namebox.value;
+	saveSettings();
+});
+
+
+spriteSelector.addEventListener("change", (event) => {
+	sprite = spriteSelector.value;
+	previewImg.src = models[sprite].src;
+	buttonIcon.src = models[sprite].src;
 	saveSettings();
 });
 
@@ -65,6 +92,10 @@ if(settings.hasOwnProperty("{uniqueID}")){
 	typedict = loaded_data.typedict ?? {};
 	button_offset_x = loaded_data.offset_x;
 	button_offset_y = loaded_data.offset_y;
+	sprite = loaded_data.sprite ?? "none";
+	spriteSelector.value = sprite;
+	previewImg.src = models[sprite].src;
+	buttonIcon.src = models[sprite].src;
 
 }else{
 	saveSettings();
@@ -77,11 +108,13 @@ function saveSettings(){
 		size: sizeSlider.value,
 		offset_x: button_offset_x,
 		offset_y: button_offset_y,
-		typedict: typedict
+		typedict: typedict,
+		sprite: sprite,
 	}
 	settings.save();
 
 	displayButtonImageOffset(button_offset_x, button_offset_y);
+	displaySpriteList();
 }
 
 //Messaging
@@ -253,6 +286,7 @@ async function loadTopics(){
 			selectionbox.value = topic;
 		}
 	}
+
 }
 
 selectionbox.addEventListener("change", (event) => {
@@ -267,6 +301,14 @@ icon.addEventListener("click", loadTopics);
 loadTopics();
 connect();
 
+function displaySpriteList() {
+	let spritelist = "";
+	for (const [key, value] of Object.entries(models)) {
+		spritelist += "<option value='"+key+"'>"+key+"</option>"
+	}
+	spriteSelector.innerHTML = spritelist;
+	spriteSelector.value = sprite;
+}
 
 function displayButtonImageOffset(x, y) {
 	if (!buttonImg.complete) return; // Wait until image is fully loaded
@@ -278,26 +320,22 @@ function displayButtonImageOffset(x, y) {
 	buttonImg.style.width = `${size}vw`;
 	buttonImg.style.height = `${size}vw`;
 
-	let offset_x = x;
-	let offset_y = y;
-
-	// let offset_x = clamp(parseFloat(x), size/2, 100 - size/2);
-	// let offset_y = clamp(parseFloat(y), size/2, 100 - size/2);
+	let offset_x = clamp(parseFloat(x), size/2, 100 - size/2);
+	let offset_y = clamp(parseFloat(y), size/2, 100 - size/2);
 
 	buttonContainer.style.position = "absolute";
-	buttonContainer.style.left = `calc(${offset_x})`;
-	buttonContainer.style.top = `calc(${offset_y})`;
+	buttonContainer.style.left = `${offset_x}%`;
+	buttonContainer.style.top = `${offset_y}%`;
 	buttonContainer.style.transform = "translate(-50%, -50%)";
-	buttonpreview.style.left = `calc(${button_offset_x} - 50px)`;
-	buttonpreview.style.top = `calc(${button_offset_y} - 50px)`;
-}
 
+	buttonpreview.style.left = `calc(${offset_x}% - 50px)`;
+	buttonpreview.style.top = `calc(${offset_y}% - 50px)`;
+
+}
 
 buttonContainer.addEventListener("click", (event) =>{
 		sendMessage();
-
 });
-
 
 //preview for moving around
 
@@ -328,13 +366,6 @@ function onMove(event) {
 		button_offset_y = (currentY/window.innerHeight * 100) +"%";
 		saveSettings();
 
-		buttonpreview.style.left = `calc(${button_offset_x} - 50px)`;
-		buttonpreview.style.top = `calc(${button_offset_y} - 50px)`;
-
-		joystick.destroy();
-		joystick = makeJoystick();
-	
-		addJoystickListeners(joystick);
 	}
 }
 
@@ -350,5 +381,6 @@ buttonpreview.addEventListener('mousedown', onStart);
 buttonpreview.addEventListener('touchstart', onStart);
 
 displayButtonImageOffset(button_offset_x, button_offset_y);
+displaySpriteList();
 
 console.log("Button Widget Loaded {uniqueID}")

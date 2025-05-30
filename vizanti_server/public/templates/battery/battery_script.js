@@ -113,6 +113,10 @@ function connect(){
 
 		let chg_prefix = msg.power_supply_status == 1 ? "charging_": "";
 
+		if (msg.percentage > 1){
+			msg.percentage = msg.percentage / 100.;
+		}
+
 		if(msg.percentage <= 0.2){
 			icon.src = icons[chg_prefix+"20%"];
 		}
